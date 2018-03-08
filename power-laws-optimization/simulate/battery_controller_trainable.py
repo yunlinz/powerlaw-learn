@@ -1,5 +1,5 @@
-from simulate.battery_controller import BatteryContoller
-from simulate.battery_controller import ActorCriticNetwork
+from battery_controller import BatteryContoller
+from battery_controller import ActorCriticNetwork
 
 from battery import Battery
 
@@ -43,15 +43,18 @@ class BatteryContollerTrainable(BatteryContoller):
       :returns: proposed state of charge, a float between 0 (empty) and 1 (full).
   """
   def __init__(self):
-      super().__init__(self)
+    pass
 
-  def create_my_env(self):
+  def initialize_network(self):
+    self.network = ActorCriticNetwork(tf.train.AdamOptimizer())
+    self.session = tf.Session()
 
 
   def get_feedback(self, reward):
     pass
 
 
+"""For A3C implementation
 
 max_episode_length = 300
 gamma = 0.99
@@ -87,4 +90,4 @@ with tf.Session as sess:
     sleep(0.5)
     worker_threads.append(t)
   coord.join(worker_threads)
-  
+"""

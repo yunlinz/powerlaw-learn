@@ -9,7 +9,7 @@ import numpy as np
 #    THIS CLASS WILL BE IMPLEMENTED BY COMPETITORS
 # ==============================================================================
 class ActorCriticNetwork(object):
-  def __init__(self, trainer, scope='global', augment_size=41,
+  def __init__(self, trainer=None, scope='global', augment_size=41,
                forecast_size=96, forecast_dim=4, rnn_a_size=24, fc_size=16):
     self.inputs = tf.placeholder(shape=[None, forecast_size, forecast_dim], dtype=tf.float32)
     lstm_cell = tf.contrib.rnn.BasicLSTMCell(rnn_a_size, state_is_tuple=True)
@@ -60,7 +60,10 @@ class ActorCriticNetwork(object):
     grads, self.grad_norms = tf.clip_by_global_norm(self.gradients, 40.0)
 
     global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global')
-    self.apply_grads = trainer.apply_gradients(zip(grads, global_vars))
+    if trainer is not None:
+      self.apply_grads = trainer.apply_gradients(zip(grads, global_vars))
+    else:
+      self.apply_grads = None
 
 
 class BatteryContoller(object):
@@ -93,9 +96,12 @@ class BatteryContoller(object):
       :returns: proposed state of charge, a float between 0 (empty) and 1 (full).
   """
   def __init__(self):
-    self.network = ActorCriticNetwork(tf.train.AdamOptimizer())
+    self.network = self.initialize_network()
     self.session = tf.Session()
     self.session.run(tf.global_variables_initializer())
+
+  def initialize_network(self):
+    return ActorCriticNetwork()
 
   def propose_state_of_charge(self,
                               site_id,
